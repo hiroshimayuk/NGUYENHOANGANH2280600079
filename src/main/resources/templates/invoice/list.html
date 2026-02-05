@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Quản Lý Đơn Hàng</title>
+</head>
+<body>
+<section layout:fragment="content" class="container mt-4">
+    <h2 class="mb-4 text-primary">Danh Sách Đơn Hàng (Admin)</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Ngày Đặt</th>
+                <th>Khách Hàng</th>
+                <th>Tổng Tiền</th>
+                <th>Hành Động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="invoice : ${invoices}">
+                <td th:text="${invoice.id}"></td>
+                <td th:text="${#dates.format(invoice.invoiceDate, 'dd-MM-yyyy HH:mm')}"></td>
+                <td th:text="${invoice.user != null ? invoice.user.username : 'Unknown'}"></td>
+                <td th:text="${#numbers.formatDecimal(invoice.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                <td>
+                    <a th:href="@{/invoices/{id}(id=${invoice.id})}" class="btn btn-info btn-sm">Xem Chi Tiết</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</body>
+</html>

@@ -56,8 +56,11 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error", "/login").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         
-                        // --- QUYỀN HẠN CHO CATEGORY (Chỉ ADMIN) ---
+                        // --- QUYỀN HẠN CHO ADMIN ---
                         .requestMatchers("/categories/**").hasAuthority("ADMIN")
+                        
+                        // ==> CẬP NHẬT MỚI: Chỉ Admin được quản lý hóa đơn
+                        .requestMatchers("/invoices/**").hasAuthority("ADMIN")
 
                         // Quyền hạn cho Books
                         .requestMatchers("/books/edit/**", "/books/add", "/books/delete")

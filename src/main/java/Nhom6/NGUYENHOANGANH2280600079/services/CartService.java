@@ -4,13 +4,17 @@ import Nhom6.NGUYENHOANGANH2280600079.daos.Cart;
 import Nhom6.NGUYENHOANGANH2280600079.daos.Item;
 import Nhom6.NGUYENHOANGANH2280600079.entities.Invoice;
 import Nhom6.NGUYENHOANGANH2280600079.entities.ItemInvoice;
-import Nhom6.NGUYENHOANGANH2280600079.entities.Book;
+import Nhom6.NGUYENHOANGANH2280600079.entities.User; // Import User
 import Nhom6.NGUYENHOANGANH2280600079.repositories.IBookRepository;
 import Nhom6.NGUYENHOANGANH2280600079.repositories.IInvoiceRepository;
 import Nhom6.NGUYENHOANGANH2280600079.repositories.IItemInvoiceRepository;
+import Nhom6.NGUYENHOANGANH2280600079.repositories.IUserRepository; // Import IUserRepository
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication; // Import Authentication
+import org.springframework.security.core.context.SecurityContextHolder; // Import SecurityContextHolder
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,7 @@ public class CartService {
     private final IInvoiceRepository invoiceRepository;
     private final IItemInvoiceRepository itemInvoiceRepository;
     private final IBookRepository bookRepository;
+    private final IUserRepository userRepository; // 1. Inject Repository để tìm User
 
     public Cart getCart(@NotNull HttpSession session) {
         return Optional.ofNullable((Cart) session.getAttribute(CART_SESSION_KEY))
@@ -58,7 +63,21 @@ public class CartService {
         var invoice = new Invoice();
         invoice.setInvoiceDate(new Date());
         invoice.setPrice(getSumPrice(session));
-        
+
+        // 2. Lấy thông tin người dùng đang đăng nhập
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
+            // Giả sử getName() trả về username (hoặc email tùy cấu hình UserDetails)
+            String currentUsername = authentication.getName(); 
+            
+            // Tìm User trong DB
+            User user = userRepository.findByUsername(currentUsername)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + currentUsername));
+            
+            // 3. Set User vào hóa đơn
+            invoice.setUser(user);
+        }
+
         Invoice savedInvoice = invoiceRepository.save(invoice);
 
         cart.getCartItems().forEach(item -> {
