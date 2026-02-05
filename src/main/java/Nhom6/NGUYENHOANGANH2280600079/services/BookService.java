@@ -34,13 +34,25 @@ public class BookService {
         bookRepository.save(book);
     }
 
+    // ==> ĐÃ SỬA PHƯƠNG THỨC NÀY <==
     public void updateBook(@NotNull Book book) {
         Book existingBook = bookRepository.findById(book.getId()).orElse(null);
-        Objects.requireNonNull(existingBook).setTitle(book.getTitle());
-        existingBook.setAuthor(book.getAuthor());
-        existingBook.setPrice(book.getPrice());
-        existingBook.setCategory(book.getCategory());
-        bookRepository.save(existingBook);
+        
+        // Kiểm tra tồn tại để tránh lỗi NullPointerException
+        if (existingBook != null) {
+            existingBook.setTitle(book.getTitle());
+            existingBook.setAuthor(book.getAuthor());
+            existingBook.setPrice(book.getPrice());
+            existingBook.setCategory(book.getCategory());
+            
+            // Logic quan trọng: Chỉ cập nhật ảnh nếu user có upload ảnh mới (book.getImage() khác null)
+            // Nếu không upload, giá trị này null, ta giữ nguyên ảnh cũ (existingBook.image)
+            if (book.getImage() != null) {
+                existingBook.setImage(book.getImage());
+            }
+            
+            bookRepository.save(existingBook);
+        }
     }
 
     public void deleteBookById(Long id) {

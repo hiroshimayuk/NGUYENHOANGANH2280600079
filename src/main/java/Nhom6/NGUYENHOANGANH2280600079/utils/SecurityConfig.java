@@ -53,13 +53,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Các đường dẫn công khai
-                        .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error", "/login").permitAll()
+                        // ==> CẬP NHẬT: Thêm "/images/**" để cho phép hiển thị ảnh sách
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/oauth/**", "/register", "/error", "/login").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         
                         // --- QUYỀN HẠN CHO ADMIN ---
                         .requestMatchers("/categories/**").hasAuthority("ADMIN")
                         
-                        // ==> CẬP NHẬT MỚI: Chỉ Admin được quản lý hóa đơn
+                        // Chỉ Admin được quản lý hóa đơn
                         .requestMatchers("/invoices/**").hasAuthority("ADMIN")
 
                         // Quyền hạn cho Books

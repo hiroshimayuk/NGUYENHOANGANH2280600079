@@ -45,6 +45,10 @@ public class Book {
     @ToString.Exclude
     private Category category;
 
+    // ==> ĐÃ THÊM TRƯỜNG IMAGE Ở ĐÂY <==
+    @Column(name = "image")
+    private String image;
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ItemInvoice> itemInvoices = new ArrayList<>();

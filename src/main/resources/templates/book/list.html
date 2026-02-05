@@ -41,6 +41,7 @@
                 <thead class="table-light text-secondary">
                 <tr>
                     <th class="py-3">ID</th>
+                    <th class="py-3">Image</th>
                     <th class="py-3">Title</th>
                     <th class="py-3">Author</th>
                     <th class="py-3 text-end">Price</th>
@@ -50,7 +51,7 @@
                 </thead>
                 <tbody>
                 <tr th:if="${books.isEmpty()}">
-                    <td colspan="6" class="text-center py-5 text-muted">
+                    <td colspan="7" class="text-center py-5 text-muted">
                         <i class="fas fa-box-open fa-3x mb-3 d-block opacity-50"></i>
                         No books found available.
                     </td>
@@ -58,9 +59,19 @@
 
                 <tr th:each="book : ${books}">
                     <td class="fw-bold text-muted" th:text="'#' + ${book.id}"></td>
+                    
+                    <td>
+                        <img th:if="${book.image != null}" 
+                             th:src="@{'/images/' + ${book.image}}" 
+                             style="width: 60px; height: 80px; object-fit: cover; border-radius: 5px;" 
+                             class="shadow-sm border"
+                             alt="Book Image">
+                        <span th:if="${book.image == null}" class="text-muted small fst-italic">No Image</span>
+                    </td>
+
                     <td>
                         <div class="d-flex align-items-center">
-                            <div class="bg-light rounded p-2 me-3 text-primary">
+                            <div class="bg-light rounded p-2 me-3 text-primary" th:if="${book.image == null}">
                                 <i class="fas fa-book fa-lg"></i>
                             </div>
                             <div>
