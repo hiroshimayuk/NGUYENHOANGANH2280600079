@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Management</title>
+    <th:block th:replace="~{layout::link-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Manage Categories</h1>
+
+    <div class="text-end mb-3">
+        <a th:href="@{/categories/add}" class="btn btn-primary">Add New Category</a>
+    </div>
+
+    <table class="table table-bordered table-hover table-striped">
+        <thead class="table-dark text-center">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${categories.isEmpty()}">
+            <td colspan="3" class="text-center">No categories found.</td>
+        </tr>
+        <tr th:each="cate : ${categories}">
+            <td th:text="${cate.id}" class="text-center"></td>
+            <td th:text="${cate.name}"></td>
+            <td class="text-center">
+                <a th:href="@{/categories/edit/{id}(id=${cate.id})}" class="btn btn-warning btn-sm">Edit</a>
+                <a th:href="@{/categories/delete/{id}(id=${cate.id})}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure? This might affect existing books.')">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<th:block th:replace="~{layout::footer}"></th:block>
+</body>
+</html>

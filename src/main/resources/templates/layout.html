@@ -4,62 +4,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookstore Application</title>
+    <title>HUTECH Bookstore</title>
     <th:block th:fragment="link-css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </th:block>
-    <th:block th:fragment="custom-css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+        
         <style>
-            body { padding-top: 20px; }
-            .footer { margin-top: 50px; padding: 20px 0; background-color: #f8f9fa; border-top: 1px solid #e9ecef; }
+            :root {
+                --primary-color: #4e73df;
+                --secondary-color: #858796;
+                --bg-color: #f8f9fc;
+            }
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: var(--bg-color);
+                color: #5a5c69;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            /* Navbar Styling */
+            .navbar {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 1rem 0;
+                box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15);
+            }
+            .navbar-brand {
+                color: #fff !important;
+                font-weight: 700;
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+            .nav-link {
+                color: rgba(255,255,255,0.8) !important;
+                font-weight: 500;
+                margin: 0 10px;
+                transition: color 0.3s;
+            }
+            .nav-link:hover, .nav-link.active {
+                color: #fff !important;
+                transform: translateY(-1px);
+            }
+            
+            /* Card Styling Global */
+            .card-custom {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+                background: #fff;
+            }
+            
+            /* Footer */
+            .footer {
+                margin-top: auto;
+                background-color: #fff;
+                padding: 25px 0;
+                border-top: 1px solid #e3e6f0;
+                box-shadow: 0 -0.15rem 1.75rem 0 rgba(58,59,69,.05);
+            }
         </style>
     </th:block>
 </head>
 <body>
 
 <header th:fragment="header">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4 rounded">
-        <div class="container-fluid">
-            <a class="navbar-brand text-primary fw-bold" href="/">HUTECH BOOKSTORE</a>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-open me-2"></i>HUTECH STORE
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">Home</a>
+                        <a class="nav-link" th:href="@{/}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/books">List Books</a>
+                        <a class="nav-link" th:href="@{/books}">Books</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
+                        <a class="nav-link" th:href="@{/categories}">Categories</a>
                     </li>
                     
-                    <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
-                        <a class="nav-link" href="/books/add">Add Book</a>
-                    </li>
-
-                    <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'USER')">
-                        <a class="nav-link" href="/cart">Cart</a>
-                    </li>
                 </ul>
 
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="btn btn-outline-primary me-2" href="/login">Login</a>
-                    </li>
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="btn btn-primary" href="/register">Register</a>
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2" sec:authorize="hasAnyAuthority('ADMIN', 'USER')">
+                        <a class="nav-link position-relative" href="/cart">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
+                            </a>
                     </li>
 
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="btn btn-outline-light btn-sm px-4 rounded-pill" href="/login">Login</a>
+                    </li>
+                    
                     <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            Hello, <span sec:authentication="name" class="fw-bold">User</span>
-                            <span sec:authorize="hasAuthority('ADMIN')" class="badge bg-danger ms-1">ADMIN</span>
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span sec:authentication="name">User</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 animate__animated animate__fadeIn">
                             <li>
                                 <form th:action="@{/logout}" method="post">
-                                    <button class="dropdown-item" type="submit">Logout</button>
+                                    <button class="dropdown-item text-danger" type="submit">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
                                 </form>
                             </li>
                         </ul>
@@ -70,11 +123,13 @@
     </nav>
 </header>
 
-<div layout:fragment="content"></div>
+<div layout:fragment="content" class="py-4"></div>
 
 <footer th:fragment="footer" class="footer text-center">
     <div class="container">
-        <p class="text-muted mb-0">Copyright © 2024 HUTECH Education. All rights reserved.</p>
+        <div class="text-muted small">
+            Copyright &copy; 2024 <b>HUTECH Education</b>. Built with Spring Boot & Bootstrap 5.
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </footer>

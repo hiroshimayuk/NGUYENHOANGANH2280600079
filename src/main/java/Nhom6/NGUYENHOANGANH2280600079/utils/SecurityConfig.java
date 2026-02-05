@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Import quan trọng
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +29,7 @@ public class SecurityConfig {
     private final OAuthService oAuthService;
     private final UserService userService;
     private final ClientRegistrationRepository clientRegistrationRepository;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // 1. Inject Filter JWT
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -52,27 +52,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(@NotNull HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable()) // 2. Tắt CSRF để test API dễ dàng hơn
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Các đường dẫn công khai
                         .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error", "/login").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         
-                        // Cho phép truy cập API đăng nhập để lấy Token
-                        .requestMatchers("/api/v1/auth/**").permitAll() 
+                        // --- QUYỀN HẠN CHO CATEGORY (Chỉ ADMIN) ---
+                        .requestMatchers("/categories/**").hasAuthority("ADMIN")
 
+                        // Quyền hạn cho Books
                         .requestMatchers("/books/edit/**", "/books/add", "/books/delete")
                         .hasAuthority("ADMIN")
-
                         .requestMatchers("/books", "/cart", "/cart/**")
                         .hasAnyAuthority("ADMIN", "USER")
 
+                        // Quyền hạn cho API
                         .requestMatchers("/api/**")
                         .hasAnyAuthority("ADMIN", "USER")
 
+                        // Các yêu cầu còn lại phải đăng nhập
                         .anyRequest().authenticated()
                 )
-                // 3. Thêm Filter JWT vào trước Filter xác thực mật khẩu
+                // Thêm Filter JWT trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
