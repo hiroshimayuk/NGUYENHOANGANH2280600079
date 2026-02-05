@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
@@ -36,16 +35,15 @@ public class SecurityConfig {
         return userService;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // ĐÃ XÓA bean passwordEncoder() ở đây để tránh vòng lặp. 
+    // Nó đã được chuyển sang AppConfig.java
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         var auth = new DaoAuthenticationProvider();
         auth.setUserDetailsService(userDetailsService());
-        auth.setPasswordEncoder(passwordEncoder());
+        // Sử dụng passwordEncoder được tiêm vào từ tham số hàm (lấy từ AppConfig)
+        auth.setPasswordEncoder(passwordEncoder); 
         return auth;
     }
 
