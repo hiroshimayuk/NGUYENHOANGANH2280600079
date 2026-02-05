@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <th:block th:replace="~{layout::link-css}"></th:block>
+</head>
+<body>
+    <th:block th:replace="~{layout::header}"></th:block>
+
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Your Shopping Cart</h1>
+
+        <div th:if="${cart != null and not #lists.isEmpty(cart.cartItems)}">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Book Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${cart.cartItems}">
+                        <td th:text="${item.bookId}" class="text-center"></td>
+                        
+                        <td th:text="${item.bookName}"></td>
+                        
+                        <td th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'" class="text-end"></td>
+                        
+                        <td style="width: 150px;" class="text-center">
+                            <input type="number" min="1" 
+                                   class="form-control text-center quantity" 
+                                   th:value="${item.quantity}" 
+                                   th:attr="data-id=${item.bookId}">
+                        </td>
+                        
+                        <td th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'" class="text-end fw-bold"></td>
+                        
+                        <td class="text-center">
+                            <a th:href="@{/cart/removeFromCart/{id}(id=${item.bookId})}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Are you sure you want to remove this book?')">
+                                <i class="fas fa-trash"></i> Remove
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <a th:href="@{/books}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h3 class="mb-3">Total Price: 
+                        <span class="text-danger fw-bold" 
+                              th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </span>
+                    </h3>
+                    
+                    <a th:href="@{/cart/clearCart}" 
+                       class="btn btn-outline-danger me-2"
+                       onclick="return confirm('Clear all items in cart?')">
+                        Clear Cart
+                    </a>
+                    
+                    <a th:href="@{/cart/checkout}" class="btn btn-success btn-lg">
+                        Checkout <i class="fas fa-check"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${cart == null or #lists.isEmpty(cart.cartItems)}" class="text-center mt-5">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Your cart is empty!</h4>
+                <p>Looks like you haven't added any books yet.</p>
+                <hr>
+                <a th:href="@{/books}" class="btn btn-primary">Go to Book List</a>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{layout::footer}"></th:block>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            // Bắt sự kiện khi thay đổi ô input có class="quantity"
+            $('.quantity').change(function () {
+                let quantity = $(this).val();
+                let id = $(this).attr('data-id');
+                
+                // Kiểm tra số lượng hợp lệ
+                if (quantity < 1) {
+                    alert("Quantity must be at least 1");
+                    $(this).val(1);
+                    return;
+                }
+
+                // Gọi AJAX đến Controller để update
+                $.ajax({
+                    url: '/cart/updateCart/' + id + '/' + quantity,
+                    type: 'GET',
+                    success: function () {
+                        // Load lại trang để cập nhật lại Tổng tiền
+                        location.reload();
+                    },
+                    error: function() {
+                        alert("Error updating cart! Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
